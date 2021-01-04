@@ -17,10 +17,12 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf.urls import url
 from resident import urls as resident_urls
+from administrator import urls as administrator_urls
 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^resident/',include(resident_urls),name = 'resident'),
+    url(r'^administrator/', include(administrator_urls),name= 'administrator'),
 ]

@@ -1,0 +1,75 @@
+from django.db.models import Count  #聚合查询
+from django.db.models import Avg,Sum #平均值，和
+#django数据库增加
+#object 模型管理器
+#第一种方法
+s1 = models.Student()
+s1.name = '小美'
+s1.age = 18
+s1.save()#保存到数据库
+#第二种方法
+s1 = models.Student(name='小美',age='18')
+s1.save()
+#第三种方法
+models.Student.objects.create(name='小美',age='18')
+#第四种方法
+stu_info = {
+    name = '小美',
+    age = '18',
+}
+models.Student.objects.create(**stu_info)
+
+
+#删除
+#第一种
+#filter过滤器，相当于where条件
+models.Student.objects.filter(pk = 14).delete()#主键为14的
+
+#更新
+#第一种
+
+res = models.Student.objects.filter(pk = 1).update(age = 15,score = 200)
+
+#查询语句
+#第一种
+#query获取查询语句
+s1 = models.Student.objects.get(pk=2)#获取单项记录
+stus = models.Student.objects.all()#获取所有记录
+print stus.query
+models.Student.objects.filter(name__iexact='小美')  #找出所有小美的记录，iexact精准匹配，忽略大小写
+stus=models.Student.objects.filter(name__iexact='小美'，score=100)
+stus=models.Student.objects.filter(id__gt=10)[0:3]  #id大于10的记录,三条记录,id__lt=10,小于10记录
+stus=models.Student.objects.filter(id__gt=10).reverse()[0:3]  #id大于10的记录,后三条记录
+
+#模糊查询
+models.Student.objects.filter(name__icontains='xiao')  #模糊查询，加i（ignore）不区分大小写，contains区分大小写
+
+#正则表达式查询
+models.Student.objects.filter(name__regex='^xiao').all() #区分大小写
+models.Student.objects.filter(name__iregex='^xiao').all() #加i区分大小写
+models.Student.objects.filter(name__iregex='^mei$').all() #加i区分大小写,mei$以mei结尾的
+
+stus=models.Student.objects.all().order_by('id')  #按id升序排列
+stus=models.Student.objects.all().order_by('-id')  #按id倒序排列
+stus=models.Student.objects.all().order_by('-id','score')  #按id倒序排列，再按照score排序
+
+#去重复查询
+stus=models.Student.objects.all().values('name','age')
+
+stus = models.Student.objects.all().values_list('name','age')  #[('xiaomei',20),(),()]
+
+stus=models.Student.objects.all().values('name','age').distinct()  #distinct()去重复
+stus.count()记录数
+
+#聚合查询
+stus = models.Student.objects.all().values('age').annotate(count = Count('age'))  #聚合查询
+
+stus = models.Student.objects.all().values('age').annotate(count = Count('age')).values('name','age','count')  #聚合查询
+
+stus = models.Student.objects.all().values('name').annotate(score_avg = Avg('score'))  #name的聚合求平均分
+
+stus = models.Student.objects.all().values('name').annotate(score_sum = Sum('score'))   #聚合求和
+
+#联表查询
+stus = models.Student.objects.all().values('cls').annotate(score_sum = Sum('score')).values('cls__name')   #聚合求和
+
